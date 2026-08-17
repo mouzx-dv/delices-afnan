@@ -112,7 +112,7 @@ if (formElement) {
             sizeInfo = `👥 الحجم: مناسب لـ ${document.getElementById('guestsCount')?.value || '0'} ضيف (القطع المطلوبة: ${document.getElementById('slicesCount')?.value || '0'} قطعة)`;
         }
 
-        const messengerUrl = "https://m.me/afnan.delices"; 
+        const phoneCallUrl = "tel:+213697353007"; 
         const formspreeApiUrl = 'https://formspree.io/f/mrevqdpw';
 
         fetch(formspreeApiUrl, {
@@ -133,11 +133,11 @@ if (formElement) {
             })
         })
         .then(response => {
-            window.open(messengerUrl, '_blank');
+            window.location.href = phoneCallUrl;
         })
         .catch(error => {
             console.error('Error sending data to Formspree:', error);
-            window.open(messengerUrl, '_blank');
+            window.location.href = phoneCallUrl;
         });
     });
 }
