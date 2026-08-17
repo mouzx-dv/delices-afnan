@@ -332,43 +332,82 @@ nav a:hover {
 }
 
 /* حاوية زر المسنجر المحدثة */
+/* حاوية زر الاتصال وتأمين الأطراف */
 .btn-wrap-messenger {
     position: relative;
     width: 100%;
     margin-top: 25px;
     overflow: hidden;
-    border-radius: 14px;
+    border-radius: 16px;
 }
 
-/* إصلاح دمج الخلفيات لزر مسنجر الحديث لكي يظهر بكامل ألوانه الفخمة */
+/* ستايل زر الاتصال الهاتفي الاحترافي المودرن */
 .messenger-btn-modern {
     position: relative;
     width: 100%;
-    padding: 20px;
-    font-size: 1.2rem;
-    font-weight: bold;
+    padding: 18px 25px;
+    font-size: 1.25rem;
+    font-weight: 800;
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     cursor: pointer;
-    color: white;
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.4s ease;
+    gap: 12px;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     
-    /* دمج دقيق لطبقة الخطوط المكررة وطبقة التدرج اللوني معاً */
+    /* تدرج أخضر مخصص للاتصال مع خطوط إضاءة */
     background-image: 
         repeating-linear-gradient(
             90deg,
             transparent,
             transparent 3px,
-            rgba(255, 255, 255, 0.15) 3px,
-            rgba(255, 255, 255, 0.15) 6px
+            rgba(255, 255, 255, 0.12) 3px,
+            rgba(255, 255, 255, 0.12) 6px
         ), 
-        linear-gradient(135deg, #006aff, #00b2ff, #a334ff);
+        linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
         
     background-size: 200% 100%;
-    box-shadow: 0 4px 15px rgba(0, 106, 255, 0.25);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+}
+
+.messenger-btn-modern span {
+    position: relative;
+    z-index: 2;
+    transition: transform 0.3s ease, letter-spacing 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* تأثير التمرير (Hover Effect) الفاخر */
+.messenger-btn-modern:hover {
+    background-position: 40px 0;
+    background-image: 
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 3px,
+            rgba(255, 255, 255, 0.18) 3px,
+            rgba(255, 255, 255, 0.18) 6px
+        ), 
+        linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+    box-shadow: 0 10px 28px rgba(16, 185, 129, 0.5);
+    transform: translateY(-3px);
+}
+
+.messenger-btn-modern:hover span {
+    transform: scale(1.03);
+    letter-spacing: 0.5px;
+}
+
+/* تأثير الضغط (Active) */
+.messenger-btn-modern:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .messenger-btn-modern span {
