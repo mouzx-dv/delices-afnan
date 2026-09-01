@@ -123,15 +123,19 @@ ${sizeInfo}
 📅 الاستلام: ${dateValue} في ${timeValue}
 📝 ملاحظات: ${notes}`;
 
-        fetch(`https://ntfy.sh/${ntfyTopic}`, {
+        // 1. إرسال الإشعار لـ ntfy عبر JSON لدعم النصوص العربية والرموز بأمان
+        fetch('https://ntfy.sh', {
             method: 'POST',
-            body: ntfyMessage,
-            headers: {
-                'Title': '🎂 طلب كعكة جديد - Délices Afnan',
-                'Priority': 'urgent',
-                'Tags': 'cake,bell'
-            }
+            body: JSON.stringify({
+                topic: ntfyTopic,
+                title: '🎂 طلب كعكة جديد - Délices Afnan',
+                message: ntfyMessage,
+                priority: 4,
+                tags: ['cake', 'bell']
+            })
         }).catch(err => console.error('ntfy error:', err));
+
+        // 2. إرسال البيانات لـ Formspree
         fetch(formspreeApiUrl, {
             method: 'POST',
             headers: {
@@ -148,13 +152,9 @@ ${sizeInfo}
                 "وقت الاستلام": timeValue,
                 "ملاحظات الزبون": notes
             })
-        })
-        .then(response => {
-            window.location.href = phoneCallUrl;
-        })
-        .catch(error => {
-            console.error('Error sending data to Formspree:', error);
-            window.location.href = phoneCallUrl;
-        });
+        }).catch(error => console.error('Formspree error:', error));
+
+        // 3. فتح الاتصال الهاتفي فوراً دون تعطيل إذن المستخدم
+        window.location.href = phoneCallUrl;
     });
 }
