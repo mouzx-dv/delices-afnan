@@ -114,7 +114,24 @@ if (formElement) {
 
         const phoneCallUrl = "tel:+213697353007"; 
         const formspreeApiUrl = 'https://formspree.io/f/mrevqdpw';
+        const ntfyTopic = "delices-afnan-ordrers";
 
+        const ntfyMessage = `👤 الزبون: ${name}
+📞 الهاتف: ${phone}
+🎨 الشكل: ${shape} | اللون: ${color}
+${sizeInfo}
+📅 الاستلام: ${dateValue} في ${timeValue}
+📝 ملاحظات: ${notes}`;
+
+        fetch(`https://ntfy.sh/${ntfyTopic}`, {
+            method: 'POST',
+            body: ntfyMessage,
+            headers: {
+                'Title': '🎂 طلب كعكة جديد - Délices Afnan',
+                'Priority': 'urgent',
+                'Tags': 'cake,bell'
+            }
+        }).catch(err => console.error('ntfy error:', err));
         fetch(formspreeApiUrl, {
             method: 'POST',
             headers: {
