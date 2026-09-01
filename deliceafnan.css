@@ -478,8 +478,3 @@ footer {
     nav a { margin: 0 10px; }
     .row-grid { grid-template-columns: 1fr; }
 }
-input[type="file"].form-control {
-    padding: 10px;
-    background-color: var(--card-bg);
-    cursor: pointer;
-}
