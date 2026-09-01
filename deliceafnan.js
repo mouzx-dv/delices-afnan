@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // ==========================================
-    // 1️⃣ التحكم في طرق اختيار المقاس وتبديل الواجهات
+    // 1️⃣ أزرار التبديل
     // ==========================================
     const btnDimensions = document.getElementById('btnDimensions');
     const btnGuests = document.getElementById('btnGuests');
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ==========================================
-    // 2️⃣ دالة التحديث الحي لملخص المواصفات
+    // 2️⃣ دالة تحديث الملخص الحي
     // ==========================================
     function updateSummary() {
         const sumShapeEl = document.getElementById('sumShape');
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
     safeAddListener('timeInput', 'input', updateSummary);
 
     // ==========================================
-    // 3️⃣ معالجة إرسال الفورم وحفظ البيانات مع إرفاق الصورة
+    // 3️⃣ معالجة إرسال الفورم وحفظ البيانات
     // ==========================================
     const formElement = document.getElementById('cakeOrderForm');
     if (formElement) {
@@ -112,6 +112,24 @@ document.addEventListener('DOMContentLoaded', function () {
             const formspreeApiUrl = 'https://formspree.io/f/mrevqdpw';
             const ntfyTopic = "delices-afnan-ordrers";
 
+            let attachmentUrl = null;
+
+            // 1. رفع ملف الصورة أولاً إلى ntfy لجلب الرابط
+            if (file) {
+                try {
+                    const uploadRes = await fetch('https://ntfy.sh/file', {
+                        method: 'POST',
+                        body: file
+                    });
+                    if (uploadRes.ok) {
+                        const fileData = await uploadRes.json();
+                        attachmentUrl = fileData.url;
+                    }
+                } catch (uploadErr) {
+                    console.error('File upload error:', uploadErr);
+                }
+            }
+
             const ntfyMessage = `👤 الزبون: ${name}
 📞 الهاتف: ${phone}
 🎨 الشكل: ${shape} | اللون: ${color}
@@ -119,37 +137,31 @@ ${sizeInfo}
 📅 الاستلام: ${dateValue} في ${timeValue}
 📝 ملاحظات: ${notes}`;
 
-            // إرسال الإشعار لـ ntfy
+            // 2. إرسال الإشعار بصيغة JSON العربي النظيف مع إرفاق الصورة
+            const payload = {
+                topic: ntfyTopic,
+                title: '🎂 طلب كعكة جديد - Délices Afnan',
+                message: ntfyMessage,
+                priority: 4,
+                tags: ['cake', 'bell']
+            };
+
+            if (attachmentUrl) {
+                payload.attach = attachmentUrl;
+                payload.filename = file.name;
+            }
+
             try {
-                if (file) {
-                    await fetch(`https://ntfy.sh/${ntfyTopic}`, {
-                        method: 'POST',
-                        body: file,
-                        headers: {
-                            'Title': encodeURIComponent('🎂 طلب كعكة جديد (مع صورة)'),
-                            'Message': encodeURIComponent(ntfyMessage),
-                            'Filename': encodeURIComponent(file.name),
-                            'Priority': 'urgent',
-                            'Tags': 'cake,camera'
-                        }
-                    });
-                } else {
-                    await fetch('https://ntfy.sh', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            topic: ntfyTopic,
-                            title: '🎂 طلب كعكة جديد - Délices Afnan',
-                            message: ntfyMessage,
-                            priority: 4,
-                            tags: ['cake', 'bell']
-                        })
-                    });
-                }
+                await fetch('https://ntfy.sh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
             } catch (err) {
                 console.error('ntfy error:', err);
             }
 
-            // إرسال البيانات لـ Formspree
+            // 3. إرسال البيانات لـ Formspree
             try {
                 await fetch(formspreeApiUrl, {
                     method: 'POST',
