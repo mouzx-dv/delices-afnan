@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
     safeAddListener('dateInput', 'input', updateSummary);
     safeAddListener('timeInput', 'input', updateSummary);
 
-    // ==========================================
+   // ==========================================
     // 3️⃣ معالجة إرسال الفورم وحفظ البيانات وتوجيه المستخدم
     // ==========================================
     const formElement = document.getElementById('cakeOrderForm');
@@ -119,31 +119,23 @@ ${sizeInfo}
 📅 الاستلام: ${dateValue} في ${timeValue}
 📝 ملاحظات: ${notes}`;
 
-            // 1. إرسال الإشعار لـ ntfy
+            // 1. إرسال الإشعار لـ ntfy باستخدام FormData (يدعم الصور والعربية معاً)
+            const formData = new FormData();
+            formData.append('topic', ntfyTopic);
+            formData.append('title', '🎂 طلب كعكة جديد - Délices Afnan');
+            formData.append('message', ntfyMessage);
+            formData.append('priority', 'urgent');
+            formData.append('tags', 'cake,bell');
+
             if (file) {
-                fetch(`https://ntfy.sh/${ntfyTopic}`, {
-                    method: 'POST',
-                    body: file,
-                    headers: {
-                        'Title': encodeURIComponent('🎂 طلب كعكة جديد (مع صورة مرفقة)'),
-                        'Message': encodeURIComponent(ntfyMessage),
-                        'Filename': encodeURIComponent(file.name),
-                        'Priority': '4',
-                        'Tags': 'cake,camera'
-                    }
-                }).catch(err => console.error('ntfy error:', err));
-            } else {
-                fetch('https://ntfy.sh', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        topic: ntfyTopic,
-                        title: '🎂 طلب كعكة جديد - Délices Afnan',
-                        message: ntfyMessage,
-                        priority: 4,
-                        tags: ['cake', 'bell']
-                    })
-                }).catch(err => console.error('ntfy error:', err));
+                formData.append('file', file);
+                formData.append('filename', file.name);
             }
+
+            fetch('https://ntfy.sh', {
+                method: 'POST',
+                body: formData
+            }).catch(err => console.error('ntfy error:', err));
 
             // 2. إرسال البيانات لـ Formspree
             fetch(formspreeApiUrl, {
