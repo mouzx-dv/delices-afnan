@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // ==========================================
-    // 1️⃣ أزرار التبديل
+    // 1️⃣ التحكم في طرق اختيار المقاس وتبديل الواجهات
     // ==========================================
     const btnDimensions = document.getElementById('btnDimensions');
     const btnGuests = document.getElementById('btnGuests');
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const guestsSection = document.getElementById('guestsSection');
 
     if (btnDimensions && btnGuests && dimensionsSection && guestsSection) {
-        btnDimensions.addEventListener('click', function(e) {
+        btnDimensions.addEventListener('click', function (e) {
             e.preventDefault();
             btnDimensions.classList.add('active');
             btnGuests.classList.remove('active');
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
             updateSummary();
         });
 
-        btnGuests.addEventListener('click', function(e) {
+        btnGuests.addEventListener('click', function (e) {
             e.preventDefault();
             btnGuests.classList.add('active');
             btnDimensions.classList.remove('active');
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ==========================================
-    // 2️⃣ دالة تحديث الملخص الحي
+    // 2️⃣ دالة التحديث الحي لملخص المواصفات
     // ==========================================
     function updateSummary() {
         const sumShapeEl = document.getElementById('sumShape');
@@ -41,10 +41,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const cakeColor = document.getElementById('cakeColor')?.value || 'حسب اختيارك الموضح';
         const dateValue = document.getElementById('dateInput')?.value || '[اختر التاريخ]';
         const timeValue = document.getElementById('timeInput')?.value || '[اختر الوقت]';
-        
+
         let sizeText = '';
         const isDimensions = dimensionsSection && dimensionsSection.style.display !== 'none';
-        
+
         if (isDimensions) {
             const length = document.getElementById('cakeLength')?.value || '0';
             const width = document.getElementById('cakeWidth')?.value || '0';
@@ -80,109 +80,84 @@ document.addEventListener('DOMContentLoaded', function () {
     safeAddListener('dateInput', 'input', updateSummary);
     safeAddListener('timeInput', 'input', updateSummary);
 
-   // ==========================================
-// 3️⃣ معالجة إرسال الفورم وحفظ البيانات مع إرفاق الصورة
-// ==========================================
-const formElement = document.getElementById('cakeOrderForm');
-if (formElement) {
-    formElement.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const name = document.getElementById('customerName')?.value || 'زبون مجهول';
-        const phone = document.getElementById('customerPhone')?.value || 'لا يوجد رقم';
-        const shape = document.getElementById('cakeShape')?.value || 'دائري كلاسيكي';
-        const color = document.getElementById('cakeColor')?.value || 'حسب ذوق الوالدة';
-        const notes = document.getElementById('cakeNotes')?.value || 'لا توجد ملاحظات إضافية';
-        const dateValue = document.getElementById('dateInput')?.value || 'لم يحدد بعد';
-        const timeValue = document.getElementById('timeInput')?.value || 'لم يحدد بعد';
-        
-        const imageInput = document.getElementById('cakeImage');
-        const file = imageInput && imageInput.files ? imageInput.files[0] : null;
-        
-        let sizeInfo = '';
-        const dimensionsSection = document.getElementById('dimensionsSection');
-        const isDimensions = dimensionsSection && dimensionsSection.style.display !== 'none';
-        
-        if (isDimensions) {
-            sizeInfo = `📐 الأبعاد: الطول ${document.getElementById('cakeLength')?.value || '0'}سم × العرض ${document.getElementById('cakeWidth')?.value || '0'}سم (${document.getElementById('cakeHeight')?.value || 'طبقة واحدة'})`;
-        } else {
-            sizeInfo = `👥 الحجم: مناسب لـ ${document.getElementById('guestsCount')?.value || '0'} ضيف (القطع المطلوبة: ${document.getElementById('slicesCount')?.value || '0'} قطعة)`;
-        }
+    // ==========================================
+    // 3️⃣ معالجة إرسال الفورم وحفظ البيانات
+    // ==========================================
+    const formElement = document.getElementById('cakeOrderForm');
+    if (formElement) {
+        formElement.addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-        const phoneCallUrl = "tel:+213697353007";[cite: 1]
-        const formspreeApiUrl = 'https://formspree.io/f/mrevqdpw';[cite: 1]
-        const ntfyTopic = "delices-afnan-ordrers";
+            const name = document.getElementById('customerName')?.value || 'زبون مجهول';
+            const phone = document.getElementById('customerPhone')?.value || 'لا يوجد رقم';
+            const shape = document.getElementById('cakeShape')?.value || 'دائري كلاسيكي';
+            const color = document.getElementById('cakeColor')?.value || 'حسب ذوق الوالدة';
+            const notes = document.getElementById('cakeNotes')?.value || 'لا توجد ملاحظات إضافية';
+            const dateValue = document.getElementById('dateInput')?.value || 'لم يحدد بعد';
+            const timeValue = document.getElementById('timeInput')?.value || 'لم يحدد بعد';
 
-        const ntfyTitle = '🎂 طلب كعكة جديد - Délices Afnan';
-        const ntfyMessage = `👤 الزبون: ${name}
+            let sizeInfo = '';
+            const isDimensions = dimensionsSection && dimensionsSection.style.display !== 'none';
+
+            if (isDimensions) {
+                sizeInfo = `📐 الأبعاد: الطول ${document.getElementById('cakeLength')?.value || '0'}سم × العرض ${document.getElementById('cakeWidth')?.value || '0'}سم (${document.getElementById('cakeHeight')?.value || 'طبقة واحدة'})`;
+            } else {
+                sizeInfo = `👥 الحجم: مناسب لـ ${document.getElementById('guestsCount')?.value || '0'} ضيف (القطع المطلوبة: ${document.getElementById('slicesCount')?.value || '0'} قطعة)`;
+            }
+
+            const phoneCallUrl = "tel:+213697353007";
+            const formspreeApiUrl = 'https://formspree.io/f/mrevqdpw';
+            const ntfyTopic = "delices-afnan-ordrers";
+
+            const ntfyMessage = `👤 الزبون: ${name}
 📞 الهاتف: ${phone}
 🎨 الشكل: ${shape} | اللون: ${color}
 ${sizeInfo}
 📅 الاستلام: ${dateValue} في ${timeValue}
 📝 ملاحظات: ${notes}`;
 
-        // دالة تشفير النصوص العربية والرموز إلى Base64
-        function toBase64(str) {
-            return btoa(unescape(encodeURIComponent(str)));
-        }
-
-        // إرسال الإشعار لـ ntfy
-        try {
-            if (file) {
-                // إرسال الصورة كمرفق مع العنوان والنص مشفرين Base64
-                await fetch(`https://ntfy.sh/${ntfyTopic}`, {
-                    method: 'PUT',
-                    body: file,
-                    headers: {
-                        'X-Title': `=?utf-8?B?${toBase64(ntfyTitle)}?=`,
-                        'X-Message': `=?utf-8?B?${toBase64(ntfyMessage)}?=`,
-                        'X-Filename': encodeURIComponent(file.name),
-                        'X-Priority': '4',
-                        'X-Tags': 'cake,camera'
-                    }
-                });
-            } else {
-                // إرسال إشعار نصي عادي عبر JSON
+            // إرسال الإشعار الفوري لتطبيق ntfy
+            try {
                 await fetch('https://ntfy.sh', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         topic: ntfyTopic,
-                        title: ntfyTitle,
+                        title: '🎂 طلب كعكة جديد - Délices Afnan',
                         message: ntfyMessage,
                         priority: 4,
                         tags: ['cake', 'bell']
                     })
                 });
+            } catch (err) {
+                console.error('ntfy error:', err);
             }
-        } catch (err) {
-            console.error('ntfy error:', err);
-        }
 
-        // إرسال البيانات لـ Formspree
-        try {
-            await fetch(formspreeApiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    "اسم الزبون": name,
-                    "رقم الهاتف": phone,
-                    "شكل الكعكة": shape,
-                    "الألوان والثيم": color,
-                    "المقاس والحجم": sizeInfo,
-                    "تاريخ الاستلام": dateValue,
-                    "وقت الاستلام": timeValue,
-                    "ملاحظات الزبون": notes,
-                    "صورة مرفقة": file ? "نعم" : "لا"
-                })
-            });
-        } catch (error) {
-            console.error('Formspree error:', error);
-        }
+            // إرسال البيانات للأرشفة في Formspree
+            try {
+                await fetch(formspreeApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "اسم الزبون": name,
+                        "رقم الهاتف": phone,
+                        "شكل الكعكة": shape,
+                        "الألوان والثيم": color,
+                        "المقاس والحجم": sizeInfo,
+                        "تاريخ الاستلام": dateValue,
+                        "وقت الاستلام": timeValue,
+                        "ملاحظات الزبون": notes
+                    })
+                });
+            } catch (error) {
+                console.error('Formspree error:', error);
+            }
 
-        window.location.href = phoneCallUrl;[cite: 1]
-    });
-}
+            // التوجيه للاتصال
+            window.location.href = phoneCallUrl;
+        });
+    }
+});
