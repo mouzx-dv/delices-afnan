@@ -80,65 +80,83 @@ document.addEventListener('DOMContentLoaded', function () {
     safeAddListener('dateInput', 'input', updateSummary);
     safeAddListener('timeInput', 'input', updateSummary);
 
-   // ==========================================
-    // 3️⃣ معالجة إرسال الفورم وحفظ البيانات وتوجيه المستخدم
-    // ==========================================
-    const formElement = document.getElementById('cakeOrderForm');
-    if (formElement) {
-        formElement.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('customerName')?.value || 'زبون مجهول';
-            const phone = document.getElementById('customerPhone')?.value || 'لا يوجد رقم';
-            const shape = document.getElementById('cakeShape')?.value || 'دائري كلاسيكي';
-            const color = document.getElementById('cakeColor')?.value || 'حسب ذوق الوالدة';
-            const notes = document.getElementById('cakeNotes')?.value || 'لا توجد ملاحظات إضافية';
-            const dateValue = document.getElementById('dateInput')?.value || 'لم يحدد بعد';
-            const timeValue = document.getElementById('timeInput')?.value || 'لم يحدد بعد';
-            
-            const imageInput = document.getElementById('cakeImage');
-            const file = imageInput && imageInput.files ? imageInput.files[0] : null;
+  // ==========================================
+// 3️⃣ معالجة إرسال الفورم وحفظ البيانات مع إرفاق الصورة
+// ==========================================
+const formElement = document.getElementById('cakeOrderForm');
+if (formElement) {
+    formElement.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('customerName')?.value || 'زبون مجهول';
+        const phone = document.getElementById('customerPhone')?.value || 'لا يوجد رقم';
+        const shape = document.getElementById('cakeShape')?.value || 'دائري كلاسيكي';
+        const color = document.getElementById('cakeColor')?.value || 'حسب ذوق الوالدة';
+        const notes = document.getElementById('cakeNotes')?.value || 'لا توجد ملاحظات إضافية';
+        const dateValue = document.getElementById('dateInput')?.value || 'لم يحدد بعد';
+        const timeValue = document.getElementById('timeInput')?.value || 'لم يحدد بعد';
+        
+        const imageInput = document.getElementById('cakeImage');
+        const file = imageInput && imageInput.files ? imageInput.files[0] : null;
+        
+        let sizeInfo = '';
+        const dimensionsSection = document.getElementById('dimensionsSection');
+        const isDimensions = dimensionsSection && dimensionsSection.style.display !== 'none';
+        
+        if (isDimensions) {
+            sizeInfo = `📐 الأبعاد: الطول ${document.getElementById('cakeLength')?.value || '0'}سم × العرض ${document.getElementById('cakeWidth')?.value || '0'}سم (${document.getElementById('cakeHeight')?.value || 'طبقة واحدة'})`;
+        } else {
+            sizeInfo = `👥 الحجم: مناسب لـ ${document.getElementById('guestsCount')?.value || '0'} ضيف (القطع المطلوبة: ${document.getElementById('slicesCount')?.value || '0'} قطعة)`;
+        }
 
-            let sizeInfo = '';
-            const isDimensions = dimensionsSection && dimensionsSection.style.display !== 'none';
-            
-            if (isDimensions) {
-                sizeInfo = `📐 الأبعاد: الطول ${document.getElementById('cakeLength')?.value || '0'}سم × العرض ${document.getElementById('cakeWidth')?.value || '0'}سم (${document.getElementById('cakeHeight')?.value || 'طبقة واحدة'})`;
-            } else {
-                sizeInfo = `👥 الحجم: مناسب لـ ${document.getElementById('guestsCount')?.value || '0'} ضيف (القطع المطلوبة: ${document.getElementById('slicesCount')?.value || '0'} قطعة)`;
-            }
+        const phoneCallUrl = "tel:+213697353007";[cite: 1]
+        const formspreeApiUrl = 'https://formspree.io/f/mrevqdpw';
+        const ntfyTopic = "delices-afnan-ordrers";
 
-            const phoneCallUrl = "tel:+213697353007";
-            const formspreeApiUrl = 'https://formspree.io/f/mrevqdpw';
-            const ntfyTopic = "delices-afnan-ordrers";
-
-            const ntfyMessage = `👤 الزبون: ${name}
+        const ntfyMessage = `👤 الزبون: ${name}
 📞 الهاتف: ${phone}
 🎨 الشكل: ${shape} | اللون: ${color}
 ${sizeInfo}
 📅 الاستلام: ${dateValue} في ${timeValue}
 📝 ملاحظات: ${notes}`;
 
-            // 1. إرسال الإشعار لـ ntfy باستخدام FormData (يدعم الصور والعربية معاً)
-            const formData = new FormData();
-            formData.append('topic', ntfyTopic);
-            formData.append('title', '🎂 طلب كعكة جديد - Délices Afnan');
-            formData.append('message', ntfyMessage);
-            formData.append('priority', 'urgent');
-            formData.append('tags', 'cake,bell');
-
-            if (file) {
-                formData.append('file', file);
-                formData.append('filename', file.name);
-            }
-
-            fetch('https://ntfy.sh', {
+        // 1. إرسال تفاصيل الطلب النصية لـ ntfy عبر JSON
+        try {
+            await fetch('https://ntfy.sh', {
                 method: 'POST',
-                body: formData
-            }).catch(err => console.error('ntfy error:', err));
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    topic: ntfyTopic,
+                    title: '🎂 طلب كعكة جديد - Délices Afnan',
+                    message: ntfyMessage,
+                    priority: 4,
+                    tags: ['cake', 'bell']
+                })
+            });
+        } catch (err) {
+            console.error('ntfy text error:', err);
+        }
 
-            // 2. إرسال البيانات لـ Formspree
-            fetch(formspreeApiUrl, {
+        // 2. إذا توفرت صورة، يتم رفعها كملف مرفق لـ ntfy
+        if (file) {
+            try {
+                await fetch(`https://ntfy.sh/${ntfyTopic}`, {
+                    method: 'PUT',
+                    body: file,
+                    headers: {
+                        'Filename': encodeURIComponent(file.name),
+                        'Title': encodeURIComponent(`📸 صورة نموذج لطلب: ${name}`),
+                        'Tags': 'camera'
+                    }
+                });
+            } catch (err) {
+                console.error('ntfy file upload error:', err);
+            }
+        }
+
+        // 3. إرسال البيانات لـ Formspree للأرشفة
+        try {
+            await fetch(formspreeApiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -153,12 +171,14 @@ ${sizeInfo}
                     "تاريخ الاستلام": dateValue,
                     "وقت الاستلام": timeValue,
                     "ملاحظات الزبون": notes,
-                    "صورة مرفقة": file ? "نعم (أُرسلت للتطبيق مباشرة)" : "لا"
+                    "صورة مرفقة": file ? "نعم (تم إرسالها إلى ntfy)" : "لا"
                 })
-            }).catch(error => console.error('Formspree error:', error));
+            });
+        } catch (error) {
+            console.error('Formspree error:', error);
+        }
 
-            // 3. فتح الاتصال الهاتفي فوراً
-            window.location.href = phoneCallUrl;
-        });
-    }
-});
+        // 4. التوجيه للاتصال الهاتفي
+        window.location.href = phoneCallUrl;
+    });
+}
