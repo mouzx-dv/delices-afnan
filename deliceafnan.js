@@ -102,6 +102,9 @@ if (formElement) {
         const dateValue = document.getElementById('dateInput')?.value || 'لم يحدد بعد';
         const timeValue = document.getElementById('timeInput')?.value || 'لم يحدد بعد';
         
+        const imageInput = document.getElementById('cakeImage');
+        const file = imageInput && imageInput.files ? imageInput.files[0] : null;
+
         let sizeInfo = '';
         const dimensionsSection = document.getElementById('dimensionsSection');
         const isDimensions = dimensionsSection && dimensionsSection.style.display === 'block';
@@ -112,9 +115,9 @@ if (formElement) {
             sizeInfo = `👥 الحجم: مناسب لـ ${document.getElementById('guestsCount')?.value || '0'} ضيف (القطع المطلوبة: ${document.getElementById('slicesCount')?.value || '0'} قطعة)`;
         }
 
-        const phoneCallUrl = "tel:+213697353007"; 
-        const formspreeApiUrl = 'https://formspree.io/f/mrevqdpw';
-        const ntfyTopic = "delices-afnan-ordrers";
+        const phoneCallUrl = "tel:+213697353007";[cite: 1, 2]
+        const formspreeApiUrl = 'https://formspree.io/f/mrevqdpw';[cite: 2]
+        const ntfyTopic = "delices-afnan-ordrers";[cite: 2]
 
         const ntfyMessage = `👤 الزبون: ${name}
 📞 الهاتف: ${phone}
@@ -123,17 +126,31 @@ ${sizeInfo}
 📅 الاستلام: ${dateValue} في ${timeValue}
 📝 ملاحظات: ${notes}`;
 
-        // 1. إرسال الإشعار لـ ntfy عبر JSON لدعم النصوص العربية والرموز بأمان
-        fetch('https://ntfy.sh', {
-            method: 'POST',
-            body: JSON.stringify({
-                topic: ntfyTopic,
-                title: '🎂 طلب كعكة جديد - Délices Afnan',
-                message: ntfyMessage,
-                priority: 4,
-                tags: ['cake', 'bell']
-            })
-        }).catch(err => console.error('ntfy error:', err));
+        // 1. إرسال الإشعار لـ ntfy (يرفق الصورة إذا قام الزبون برفعها)
+        if (file) {
+            fetch(`https://ntfy.sh/${ntfyTopic}`, {
+                method: 'POST',
+                body: file,
+                headers: {
+                    'Title': encodeURIComponent('🎂 طلب كعكة جديد (مع صورة مرفقة)'),
+                    'Message': encodeURIComponent(ntfyMessage),
+                    'Filename': encodeURIComponent(file.name),
+                    'Priority': '4',
+                    'Tags': 'cake,camera'
+                }
+            }).catch(err => console.error('ntfy error:', err));
+        } else {
+            fetch('https://ntfy.sh', {
+                method: 'POST',
+                body: JSON.stringify({
+                    topic: ntfyTopic,
+                    title: '🎂 طلب كعكة جديد - Délices Afnan',
+                    message: ntfyMessage,
+                    priority: 4,
+                    tags: ['cake', 'bell']
+                })
+            }).catch(err => console.error('ntfy error:', err));
+        }
 
         // 2. إرسال البيانات لـ Formspree
         fetch(formspreeApiUrl, {
@@ -150,11 +167,12 @@ ${sizeInfo}
                 "المقاس والحجم": sizeInfo,
                 "تاريخ الاستلام": dateValue,
                 "وقت الاستلام": timeValue,
-                "ملاحظات الزبون": notes
+                "ملاحظات الزبون": notes,
+                "صورة مرفقة": file ? "نعم (أُرسلت للتطبيق مباشرة)" : "لا"
             })
         }).catch(error => console.error('Formspree error:', error));
 
-        // 3. فتح الاتصال الهاتفي فوراً دون تعطيل إذن المستخدم
+        // 3. فتح الاتصال الهاتفي فوراً
         window.location.href = phoneCallUrl;
     });
 }
